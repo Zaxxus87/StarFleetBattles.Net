@@ -1,0 +1,303 @@
+﻿@page "/"
+@using StarFleetBattles.Application.DTOs
+@using StarFleetBattles.Application.Services
+@using Microsoft.AspNetCore.Components.Web
+@inject IGameService GameService
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+<PageTitle>Star Fleet Battles</PageTitle>
+
+<div tabindex="0" @onkeydown="HandleKeyDown" @onfocus="OnFocused" 
+     style="outline: none; width: 100%; height: 100vh;">
+
+<div style="padding: 20px;">
+    <h1>Star Fleet Battles</h1>
+    
+    <div style="margin-bottom: 20px;">
+        <button class="btn btn-primary" @onclick="MoveNormal" disabled="@isProcessing">
+            ↑ Move Forward
+        </button>
+        <button class="btn btn-secondary" @onclick="SideslipLeft" disabled="@isProcessing">
+            ← Left
+        </button>
+        <button class="btn btn-secondary" @onclick="SideslipRight" disabled="@isProcessing">
+            → Right
+        </button>
+        <button class="btn btn-info" @onclick="TurnLeft" disabled="@isProcessing">
+            ↺ Turn Left
+        </button>
+        <button class="btn btn-info" @onclick="TurnRight" disabled="@isProcessing">
+            ↻ Turn Right
+        </button>
+        <button class="btn btn-warning" @onclick="TestGameService">
+            🔧 Test
+        </button>
+    </div>
+
+    <div style="border: 2px solid #ddd; padding: 10px; background: white; margin-bottom: 20px; overflow: auto;">
+      <svg width="1400" height="900" viewBox="0 0 1400 900">
+        <!-- Draw correctly spaced hexagon grid -->
+        @{
+            var hexSize = 30;  // Distance from center to vertex
+            // Correct hexagon grid spacing calculations
+            var hexWidth = hexSize * 2;  // Full width point-to-point
+            var hexHeight = hexSize * Math.Sqrt(3);  // Full height flat-to-flat
+            var colWidth = hexWidth * 0.75;  // Horizontal distance between column centers
+            var rowHeight = hexHeight;  // Vertical distance between row centers
+        }
+        
+        @for (int row = 0; row < 15; row++)
+        {
+            @for (int col = 0; col < 20; col++)
+            {
+                // Calculate hex center position
+                var centerX = 50 + col * colWidth;  // Start 50px from left edge
+                var centerY = 50 + row * rowHeight;  // Start 50px from top edge
+                
+                // Offset every other column by half row height
+                if (col % 2 == 1)
+                {
+                    centerY += rowHeight / 2;
+                }
+                
+                <polygon points="@GetHexagonPoints(centerX, centerY, hexSize)" 
+                         fill="none" 
+                         stroke="black" 
+                         stroke-width="1" />
+                         
+                <!-- Debug: Show hex center -->
+               @*  <circle cx="@centerX" cy="@centerY" r="2" fill="red" opacity="0.5" /> *@
+            }
+        }
+
+            <!-- Draw ship using image files -->
+            @if (playerShip != null)
+            {
+                <image x="@(playerShip.X - 20)" y="@(playerShip.Y - 20)"
+                       width="40" height="40"
+                       href="@GetShipImagePath(playerShip.Facing)"
+                       opacity="1" />
+
+                <!-- Ship center reference -->
+                <circle cx="@playerShip.X" cy="@playerShip.Y" r="1" fill="red" />
+            }
+
+      </svg>
+    </div>
+
+    @if (playerShip != null)
+    {
+        <div>
+            <p><strong>Position:</strong> (@playerShip.X.ToString("F1"), @playerShip.Y.ToString("F1"))</p>
+            <p><strong>Facing:</strong> @GetFacingDirection(playerShip.Facing) (@playerShip.Facing)</p>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(debugMessage))
+    {
+        <div style="background: yellow; padding: 10px;">
+            @debugMessage
+        </div>
+    }
+</div>
+</div>
+@code {
+    private ShipDto? playerShip;
+    private bool isProcessing = false;
+    private string debugMessage = "";
+    private bool hasFocus = false;
+
+    private async Task OnFocused()
+    {
+        hasFocus = true;
+        debugMessage = "Click here first, then use keyboard: ↑ = Move, ← → = Sideslip, R = Turn Right, E = Turn Left";
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (isProcessing) return;
+
+        switch (e.Key.ToLower())
+        {
+            case "arrowup":
+                await MoveNormal();
+                break;
+            case "arrowleft":
+                await SideslipLeft();
+                break;
+            case "arrowright":
+                await SideslipRight();
+                break;
+            case "r":
+                await TurnRight();
+                break;
+            case "e":
+                await TurnLeft();
+                break;
+            case "escape":
+                debugMessage = "Game focused. Use keyboard controls.";
+                break;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            debugMessage = "Initializing...";
+            await GameService.InitializeGameAsync();
+            await RefreshGameState();
+            debugMessage = "Ready!";
+        }
+        catch (Exception ex)
+        {
+            debugMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    private string GetHexagonPoints(double centerX, double centerY, double radius)
+    {
+        var points = new List<string>();
+        for (int i = 0; i < 6; i++)
+        {
+            // Start from top point (flat top hexagon)
+            var angle = (i * 60) * Math.PI / 180;
+            var x = centerX + radius * Math.Cos(angle);
+            var y = centerY + radius * Math.Sin(angle);
+            points.Add($"{x:F1},{y:F1}");
+        }
+        return string.Join(" ", points);
+    }
+
+    private string GetShipImagePath(int facing)
+    {
+        return $"/images/federation{facing + 1}.jpg";
+    }
+
+    private string GetFacingDirection(int facing)
+    {
+        return facing switch
+        {
+            0 => "North",
+            1 => "Northeast",
+            2 => "Southeast", 
+            3 => "South",
+            4 => "Southwest",
+            5 => "Northwest",
+            _ => "Unknown"
+        };
+    }
+
+    private async Task TestGameService()
+    {
+        try
+        {
+            var ship = await GameService.GetPlayerShipAsync();
+            debugMessage = ship == null ? "No ship found!" : $"Ship at ({ship.X:F1}, {ship.Y:F1})";
+        }
+        catch (Exception ex)
+        {
+            debugMessage = $"Test error: {ex.Message}";
+        }
+    }
+
+    private async Task MoveNormal()
+    {
+        if (isProcessing) return;
+        isProcessing = true;
+        try
+        {
+            await GameService.MovePlayerShipNormalAsync();
+            await RefreshGameState();
+            debugMessage = "Moved forward!";
+        }
+        catch (Exception ex) { debugMessage = $"Move error: {ex.Message}"; }
+        finally { isProcessing = false; }
+    }
+
+    private async Task SideslipRight()
+    {
+        if (isProcessing) return;
+        isProcessing = true;
+        try
+        {
+            await GameService.SideslipPlayerShipRightAsync();
+            await RefreshGameState();
+            debugMessage = "Sideslipped right!";
+        }
+        catch (Exception ex) { debugMessage = $"Right error: {ex.Message}"; }
+        finally { isProcessing = false; }
+    }
+
+    private async Task SideslipLeft()
+    {
+        if (isProcessing) return;
+        isProcessing = true;
+        try
+        {
+            await GameService.SideslipPlayerShipLeftAsync();
+            await RefreshGameState();
+            debugMessage = "Sideslipped left!";
+        }
+        catch (Exception ex) { debugMessage = $"Left error: {ex.Message}"; }
+        finally { isProcessing = false; }
+    }
+
+    private async Task TurnRight()
+    {
+        if (isProcessing) return;
+        isProcessing = true;
+        try
+        {
+            await GameService.TurnPlayerShipRightAsync();
+            await RefreshGameState();
+            debugMessage = "Turned right!";
+        }
+        catch (Exception ex) { debugMessage = $"Turn right error: {ex.Message}"; }
+        finally { isProcessing = false; }
+    }
+
+    private async Task TurnLeft()
+    {
+        if (isProcessing) return;
+        isProcessing = true;
+        try
+        {
+            await GameService.TurnPlayerShipLeftAsync();
+            await RefreshGameState();
+            debugMessage = "Turned left!";
+        }
+        catch (Exception ex) { debugMessage = $"Turn left error: {ex.Message}"; }
+        finally { isProcessing = false; }
+    }
+
+    private async Task RefreshGameState()
+    {
+        try
+        {
+            playerShip = await GameService.GetPlayerShipAsync();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            debugMessage = $"Refresh error: {ex.Message}";
+        }
+    }
+}
+
+<style>
+    .btn {
+        padding: 8px 12px;
+        margin: 3px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    .btn-primary { background-color: #007bff; color: white; }
+    .btn-secondary { background-color: #6c757d; color: white; }
+    .btn-info { background-color: #17a2b8; color: white; }
+    .btn-warning { background-color: #ffc107; color: black; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+</style>
