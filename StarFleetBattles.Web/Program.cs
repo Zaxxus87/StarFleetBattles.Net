@@ -14,6 +14,7 @@ builder.Services.AddLogging();
 // Register our application services
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IShipMovementService, ShipMovementService>();
+builder.Services.AddScoped<IEnergyAllocationService, EnergyAllocationService>();
 
 var app = builder.Build();
 

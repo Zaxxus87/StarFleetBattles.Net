@@ -2,7 +2,9 @@
 @using StarFleetBattles.Application.DTOs
 @using StarFleetBattles.Application.Services
 @using Microsoft.AspNetCore.Components.Web
+@using StarFleetBattles.Web.Components.Shared
 @inject IGameService GameService
+@inject IEnergyAllocationService EnergyService
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 
@@ -11,102 +13,151 @@
 <div tabindex="0" @onkeydown="HandleKeyDown" @onfocus="OnFocused" 
      style="outline: none; width: 100%; height: 100vh;">
 
-<div style="padding: 20px;">
-    <h1>Star Fleet Battles</h1>
-    
-    <div style="margin-bottom: 20px;">
-        <button class="btn btn-primary" @onclick="MoveNormal" disabled="@isProcessing">
-            ↑ Move Forward
-        </button>
-        <button class="btn btn-secondary" @onclick="SideslipLeft" disabled="@isProcessing">
-            ← Left
-        </button>
-        <button class="btn btn-secondary" @onclick="SideslipRight" disabled="@isProcessing">
-            → Right
-        </button>
-        <button class="btn btn-info" @onclick="TurnLeft" disabled="@isProcessing">
-            ↺ Turn Left
-        </button>
-        <button class="btn btn-info" @onclick="TurnRight" disabled="@isProcessing">
-            ↻ Turn Right
-        </button>
-        <button class="btn btn-warning" @onclick="TestGameService">
-            🔧 Test
-        </button>
-    </div>
-
-    <div style="border: 2px solid #ddd; padding: 10px; background: white; margin-bottom: 20px; overflow: auto;">
-      <svg width="1400" height="900" viewBox="0 0 1400 900">
-        <!-- Draw correctly spaced hexagon grid -->
-        @{
-            var hexSize = 30;  // Distance from center to vertex
-            // Correct hexagon grid spacing calculations
-            var hexWidth = hexSize * 2;  // Full width point-to-point
-            var hexHeight = hexSize * Math.Sqrt(3);  // Full height flat-to-flat
-            var colWidth = hexWidth * 0.75;  // Horizontal distance between column centers
-            var rowHeight = hexHeight;  // Vertical distance between row centers
-        }
+<div style="display: flex; gap: 20px; padding: 20px; height: calc(100vh - 40px); overflow: hidden;">
+    <!-- Left Panel: Game Controls and Hex Grid -->
+    <div style="display: flex; flex-direction: column; overflow: hidden;">
+        <div style="background: white; border: 2px solid #333; padding: 10px; margin-bottom: 10px;">
+            <h1 style="margin: 0;">Star Fleet Battles</h1>
+        </div>
         
-        @for (int row = 0; row < 15; row++)
-        {
-            @for (int col = 0; col < 20; col++)
-            {
-                // Calculate hex center position
-                var centerX = 50 + col * colWidth;  // Start 50px from left edge
-                var centerY = 50 + row * rowHeight;  // Start 50px from top edge
-                
-                // Offset every other column by half row height
-                if (col % 2 == 1)
-                {
-                    centerY += rowHeight / 2;
+        <div style="background: white; border: 2px solid #333; padding: 10px; margin-bottom: 10px;">
+            <div style="display: inline-block; background-color: #f0f0f0; padding: 10px 20px; border-radius: 5px; margin-right: 20px; border: 2px solid #007bff;">
+                <strong style="font-size: 18px;">Turn: @currentTurn</strong>
+            </div>
+            <button class="btn btn-primary" @onclick="MoveNormal" disabled="@isProcessing">
+                ↑ Move Forward
+            </button>
+            <button class="btn btn-secondary" @onclick="SideslipLeft" disabled="@isProcessing">
+                ← Left
+            </button>
+            <button class="btn btn-secondary" @onclick="SideslipRight" disabled="@isProcessing">
+                → Right
+            </button>
+            <button class="btn btn-info" @onclick="TurnLeft" disabled="@isProcessing">
+                ↺ Turn Left
+            </button>
+            <button class="btn btn-info" @onclick="TurnRight" disabled="@isProcessing">
+                ↻ Turn Right
+            </button>
+            <button class="btn btn-danger" @onclick="EndTurn">
+                ⏭ End Turn
+            </button>
+        </div>
+
+        <div style="flex: 1; border: 2px solid #ddd; background: white; overflow: auto; max-width: fit-content;">
+            <svg width="800" height="900" viewBox="0 0 800 900">
+                @{
+                    var hexSize = 30;
+                    var hexWidth = hexSize * 2;
+                    var hexHeight = hexSize * Math.Sqrt(3);
+                    var colWidth = hexWidth * 0.75;
+                    var rowHeight = hexHeight;
                 }
                 
-                <polygon points="@GetHexagonPoints(centerX, centerY, hexSize)" 
-                         fill="none" 
-                         stroke="black" 
-                         stroke-width="1" />
-                         
-                <!-- Debug: Show hex center -->
-               @*  <circle cx="@centerX" cy="@centerY" r="2" fill="red" opacity="0.5" /> *@
-            }
-        }
+                @for (int row = 0; row < 15; row++)
+                {
+                    @for (int col = 0; col < 20; col++)
+                    {
+                        var centerX = 50 + col * colWidth;
+                        var centerY = 50 + row * rowHeight;
+                        
+                        if (col % 2 == 1)
+                        {
+                            centerY += rowHeight / 2;
+                        }
+                        
+                        <polygon points="@GetHexagonPoints(centerX, centerY, hexSize)" 
+                                 fill="none" 
+                                 stroke="black" 
+                                 stroke-width="1" />
+                    }
+                }
 
-            <!-- Draw ship using image files -->
-            @if (playerShip != null)
-            {
-                <image x="@(playerShip.X - 20)" y="@(playerShip.Y - 20)"
-                       width="40" height="40"
-                       href="@GetShipImagePath(playerShip.Facing)"
-                       opacity="1" />
+                @if (playerShip != null)
+                {
+                    <image x="@(playerShip.X - 20)" y="@(playerShip.Y - 20)"
+                           width="40" height="40"
+                           href="@GetShipImagePath(playerShip.Facing)"
+                           opacity="1" />
 
-                <!-- Ship center reference -->
-                <circle cx="@playerShip.X" cy="@playerShip.Y" r="1" fill="red" />
-            }
-
-      </svg>
+                    <circle cx="@playerShip.X" cy="@playerShip.Y" r="1" fill="red" />
+                }
+            </svg>
+        </div>
     </div>
+        <!-- Right Panel: Energy Allocation Form or Ship Status Display -->
+        <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden; border: 2px solid #007bff; border-radius: 8px; background: white;">
+            <div style="padding: 15px; border-bottom: 2px solid #007bff; background-color: #f8f9fa;">
+                <h3 style="margin: 0; color: #007bff;">
+                    @if (showShipStatus)
+                    {
+                        <span>Ship Status Display</span>
+                    }
+                    else
+                    {
+                        <span>Energy Allocation - Turn @currentTurn</span>
+                    }
+                </h3>
+            </div>
 
-    @if (playerShip != null)
-    {
-        <div>
-            <p><strong>Position:</strong> (@playerShip.X.ToString("F1"), @playerShip.Y.ToString("F1"))</p>
-            <p><strong>Facing:</strong> @GetFacingDirection(playerShip.Facing) (@playerShip.Facing)</p>
+            <div style="flex: 1; overflow: auto; padding: 15px;">
+                @if (showShipStatus)
+                {
+                    <ShipStatusDisplay OnBackToEnergy="@(() => showShipStatus = false)" />
+                }
+                else
+                {
+                    <EnergyAllocationForm CurrentTurn="@currentTurn" OnShowShip="@(() => showShipStatus = true)" />
+                }
+            </div>
         </div>
-    }
-
-    @if (!string.IsNullOrEmpty(debugMessage))
-    {
-        <div style="background: yellow; padding: 10px;">
-            @debugMessage
-        </div>
-    }
 </div>
 </div>
+
 @code {
     private ShipDto? playerShip;
     private bool isProcessing = false;
     private string debugMessage = "";
     private bool hasFocus = false;
+    private int currentTurn = 1;
+    private bool showShipStatus = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            debugMessage = "Initializing...";
+            await GameService.InitializeGameAsync();
+            await RefreshGameState();
+            currentTurn = EnergyService.GetCurrentTurn();
+            debugMessage = "Ready!";
+        }
+        catch (Exception ex)
+        {
+            debugMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    private void EndTurn()
+    {
+        try
+        {
+            if (!EnergyService.ValidateTurn(currentTurn, out var error))
+            {
+                debugMessage = $"Cannot end turn: {error}";
+                return;
+            }
+
+            EnergyService.AdvanceTurn();
+            currentTurn = EnergyService.GetCurrentTurn();
+            debugMessage = $"Advanced to Turn {currentTurn}";
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            debugMessage = $"Error ending turn: {ex.Message}";
+        }
+    }
 
     private async Task OnFocused()
     {
@@ -141,27 +192,11 @@
         }
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            debugMessage = "Initializing...";
-            await GameService.InitializeGameAsync();
-            await RefreshGameState();
-            debugMessage = "Ready!";
-        }
-        catch (Exception ex)
-        {
-            debugMessage = $"Error: {ex.Message}";
-        }
-    }
-
     private string GetHexagonPoints(double centerX, double centerY, double radius)
     {
         var points = new List<string>();
         for (int i = 0; i < 6; i++)
         {
-            // Start from top point (flat top hexagon)
             var angle = (i * 60) * Math.PI / 180;
             var x = centerX + radius * Math.Cos(angle);
             var y = centerY + radius * Math.Sin(angle);
@@ -187,19 +222,6 @@
             5 => "Northwest",
             _ => "Unknown"
         };
-    }
-
-    private async Task TestGameService()
-    {
-        try
-        {
-            var ship = await GameService.GetPlayerShipAsync();
-            debugMessage = ship == null ? "No ship found!" : $"Ship at ({ship.X:F1}, {ship.Y:F1})";
-        }
-        catch (Exception ex)
-        {
-            debugMessage = $"Test error: {ex.Message}";
-        }
     }
 
     private async Task MoveNormal()
@@ -298,6 +320,7 @@
     .btn-primary { background-color: #007bff; color: white; }
     .btn-secondary { background-color: #6c757d; color: white; }
     .btn-info { background-color: #17a2b8; color: white; }
-    .btn-warning { background-color: #ffc107; color: black; }
+    .btn-success { background-color: #28a745; color: white; }
+    .btn-danger { background-color: #dc3545; color: white; }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>
