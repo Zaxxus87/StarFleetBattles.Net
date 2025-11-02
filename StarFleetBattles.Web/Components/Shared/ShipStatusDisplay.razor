@@ -2,17 +2,158 @@
 
 <div class="ssd-container">
     <div class="button-bar">
-        <button type="button" @onclick="OnBackToEnergy" class="btn btn-primary">Back to Energy Allocation</button>
+        <button type="button" @onclick="BackToEnergy" class="btn btn-primary">Back to Energy Allocation</button>
     </div>
 
     <div class="ssd-display">
-        <h3 class="ssd-title">FEDERATION TOURNAMENT COMMAND CRUISER</h3>
+        <div class="ssd-wrapper">
+            <img src="/images/ssd-fed-cruiser.png" alt="Ship Status Display" class="ssd-image" />
 
-        <div class="ssd-image-container">
-            <img src="/images/ssd-fed-cruiser.png" alt="Ship Status Display" class="ssd-background" />
+            <!-- Overlay clickable damage boxes -->
+            <div class="damage-overlay">
+                <!-- Shield #1 boxes - Top shield with 10 columns -->
+                @for (int i = 1; i <= 10; i++)
+                {
+                    var boxId = $"Shield1-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield1X(i))%; top: @(GetShield1Y())%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
 
-            <!-- Clickable damage boxes will be overlaid on the image -->
-            <!-- These positions will need to be adjusted based on the actual image -->
+                <!-- Shield #1 Second Row -->
+                @for (int i = 11; i <= 20; i++)
+                {
+                    var boxId = $"Shield1-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield1X(i - 10))%; top: @(GetShield1Y() + 2.8)%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Shield #1 Third Row -->
+                @for (int i = 21; i <= 30; i++)
+                {
+                    var boxId = $"Shield1-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield1X(i - 20))%; top: @(GetShield1Y() + 5.6)%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Shield #6 boxes (left side) -->
+                <!-- Shield #6 boxes (left side) - Column 1 (12 boxes) -->
+                @for (int i = 1; i <= 12; i++)
+                {
+                    var boxId = $"Shield6-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield6X(1))%; top: @(GetShield6Y(i))%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Shield #6 Column 2 (12 boxes) -->
+                @for (int i = 13; i <= 24; i++)
+                {
+                    var boxId = $"Shield6-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield6X(2))%; top: @(GetShield6Y(i - 12))%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Shield #6 Column 3 (6 boxes, starts at same Y as column 1) -->
+                @for (int i = 25; i <= 30; i++)
+                {
+                    var boxId = $"Shield6-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield6X(3))%; top: @(GetShield6Y(i - 24))%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Shield #2 boxes (right side) -->
+                @for (int i = 1; i <= 8; i++)
+                {
+                    var boxId = $"Shield2-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield2X())%; top: @(GetShield2Y(i))%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Shield #5 boxes (left lower side) -->
+                @for (int i = 1; i <= 8; i++)
+                {
+                    var boxId = $"Shield5-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield5X())%; top: @(GetShield5Y(i))%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Shield #3 boxes (right lower side) -->
+                @for (int i = 1; i <= 8; i++)
+                {
+                    var boxId = $"Shield3-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield3X())%; top: @(GetShield3Y(i))%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Shield #4 boxes (bottom) -->
+                @for (int i = 1; i <= 8; i++)
+                {
+                    var boxId = $"Shield4-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield4X(i))%; top: @(GetShield4Y())%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Add more systems as needed -->
+            </div>
         </div>
     </div>
 </div>
@@ -20,7 +161,7 @@
 @code {
     [Parameter] public EventCallback OnBackToEnergy { get; set; }
 
-    private Dictionary<string, bool> damageBoxes = new();
+    private Dictionary<string, bool> damageBoxes = new Dictionary<string, bool>();
 
     protected override void OnInitialized()
     {
@@ -29,60 +170,128 @@
 
     private void InitializeDamageBoxes()
     {
-        // Initialize all damage boxes as unchecked (false)
-        // We'll add specific box IDs based on the SSD layout
-
-        // Example structure - you'll need to expand this based on all boxes in the image
-        // Format: "SystemName-BoxNumber"
-
-        // Shield boxes
-        for (int i = 1; i <= 6; i++)
+        // Initialize all damage boxes
+        for (int box = 1; box <= 30; box++)
         {
-            for (int j = 1; j <= 8; j++)
+            damageBoxes[$"Shield1-{box}"] = false;
+        }
+
+        // Shields 2-6 have 8 boxes each
+        for (int shield = 2; shield <= 6; shield++)
+        {
+            for (int box = 1; box <= 30; box++)
             {
-                damageBoxes[$"Shield{i}-{j}"] = false;
+                damageBoxes[$"Shield{shield}-{box}"] = false;
             }
         }
 
-        // Phaser boxes
+        // Add more systems
         for (int i = 1; i <= 4; i++)
         {
             for (int j = 1; j <= 3; j++)
             {
+                damageBoxes[$"Photon{i}-{j}"] = false;
                 damageBoxes[$"Phaser{i}-{j}"] = false;
             }
         }
 
-        // Photon Torpedo boxes
-        for (int i = 1; i <= 4; i++)
-        {
-            for (int j = 1; j <= 3; j++)
-            {
-                damageBoxes[$"PhotonTorp{i}-{j}"] = false;
-            }
-        }
-
-        // Warp Engine boxes
-        damageBoxes["WarpL-1"] = false;
-        damageBoxes["WarpL-2"] = false;
-        damageBoxes["WarpR-1"] = false;
-        damageBoxes["WarpR-2"] = false;
-
-        // Impulse Engine boxes
         for (int i = 1; i <= 3; i++)
         {
+            damageBoxes[$"WarpL-{i}"] = false;
+            damageBoxes[$"WarpR-{i}"] = false;
             damageBoxes[$"Impulse-{i}"] = false;
         }
 
-        // Additional systems will be added as needed
+        damageBoxes["Bridge"] = false;
+        damageBoxes["Lab"] = false;
+        damageBoxes["Battery"] = false;
     }
 
-    private void ToggleDamageBox(string boxId)
+    private void ToggleBox(string boxId)
     {
         if (damageBoxes.ContainsKey(boxId))
         {
             damageBoxes[boxId] = !damageBoxes[boxId];
         }
+    }
+
+    private bool IsBoxDamaged(string boxId)
+    {
+        return damageBoxes.ContainsKey(boxId) && damageBoxes[boxId];
+    }
+
+    private async Task BackToEnergy()
+    {
+        await OnBackToEnergy.InvokeAsync();
+    }
+
+    // Position helper methods - these will need to be adjusted based on your actual image
+    private double GetShield1X(int boxNum)
+    {
+        // Shield 1 is at top, boxes are horizontal
+        return 32.4 + (boxNum * 3.5); // Adjust these values
+    }
+
+    private double GetShield1Y()
+    {
+        return 15.25; // Adjust this value
+    }
+
+    private double GetShield6X(int column)
+    {
+        // Three columns for Shield 6
+        return column switch
+        {
+            1 => 14.8,      // First column
+            2 => 18,      // Second column (adjust spacing as needed)
+            3 => 21.5,      // Third column (adjust spacing as needed)
+            _ => 14.8
+        };
+    }
+
+    private double GetShield6Y(int boxNum)
+    {
+        return 20.3 + (boxNum * 2.5); // Vertical boxes
+    }
+
+    private double GetShield2X()
+    {
+        return 88; // Right side shield
+    }
+
+    private double GetShield2Y(int boxNum)
+    {
+        return 20.5 + (boxNum * 2.45); // Vertical boxes
+    }
+
+    private double GetShield5X()
+    {
+        return 14.8; // Left side shield (lower)
+    }
+
+    private double GetShield5Y(int boxNum)
+    {
+        return 59.5 + (boxNum * 2.45); // Vertical boxes, lower position
+    }
+
+    private double GetShield3X()
+    {
+        return 88.25; // Right side shield (lower)
+    }
+
+    private double GetShield3Y(int boxNum)
+    {
+        return 59.5 + (boxNum * 2.45); // Vertical boxes, lower position
+    }
+
+    private double GetShield4X(int boxNum)
+    {
+        return 28.4 + (boxNum * 3.5); // Bottom shield, horizontal boxes
+    }
+
+    private double GetShield4Y()
+    {
+        return 93.5; // Bottom position
     }
 }
 
@@ -91,45 +300,83 @@
         height: 100%;
         display: flex;
         flex-direction: column;
-        background: white;
     }
 
     .button-bar {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
         padding: 10px;
-        background-color: #f8f9fa;
+        background: #f8f9fa;
         border-radius: 4px;
+        margin-bottom: 15px;
     }
 
     .ssd-display {
         flex: 1;
         overflow: auto;
         display: flex;
-        flex-direction: column;
-        align-items: center;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px;
     }
 
-    .ssd-title {
-        text-align: center;
-        margin-bottom: 20px;
-        color: #333;
-        font-weight: bold;
-    }
-
-    .ssd-image-container {
+    .ssd-wrapper {
         position: relative;
         max-width: 100%;
-        display: flex;
-        justify-content: center;
+        display: inline-block;
     }
 
-    .ssd-background {
-        max-width: 100%;
+    .ssd-image {
+        width: 100%;
         height: auto;
-        border: 2px solid #333;
+        display: block;
     }
+
+    .damage-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    .damage-box {
+        position: absolute;
+        width: 3%;
+        height: 2.2%;
+        cursor: pointer;
+        pointer-events: all;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.2);
+    }
+
+        .damage-box:hover {
+            background: rgba(255, 255, 0, 0.3);
+        }
+
+    .x-mark {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+
+        .x-mark::before,
+        .x-mark::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: red;
+            top: 50%;
+            left: 0;
+        }
+
+        .x-mark::before {
+            transform: translateY(-50%) rotate(45deg);
+        }
+
+        .x-mark::after {
+            transform: translateY(-50%) rotate(-45deg);
+        }
 
     .btn {
         padding: 8px 16px;
@@ -137,7 +384,6 @@
         border-radius: 4px;
         cursor: pointer;
         font-weight: 500;
-        font-size: 14px;
     }
 
     .btn-primary {
@@ -148,4 +394,6 @@
         .btn-primary:hover {
             background-color: #0056b3;
         }
+
+    }
 </style>
