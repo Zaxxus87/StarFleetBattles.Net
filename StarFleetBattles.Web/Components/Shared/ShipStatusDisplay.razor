@@ -96,12 +96,12 @@
                     </div>
                 }
 
-                <!-- Shield #2 boxes (right side) -->
-                @for (int i = 1; i <= 8; i++)
+                <!-- Shield #2 boxes (right side) - Column 1 (12 boxes) -->
+                @for (int i = 1; i <= 12; i++)
                 {
                     var boxId = $"Shield2-{i}";
                     <div class="damage-box"
-                         style="left: @(GetShield2X())%; top: @(GetShield2Y(i))%;"
+                         style="left: @(GetShield2X(1))%; top: @(GetShield2Y(i))%;"
                          @onclick="() => ToggleBox(boxId)">
                         @if (IsBoxDamaged(boxId))
                         {
@@ -110,12 +110,40 @@
                     </div>
                 }
 
-                <!-- Shield #5 boxes (left lower side) -->
-                @for (int i = 1; i <= 8; i++)
+                <!-- Shield #2 Column 2 (12 boxes) -->
+                @for (int i = 13; i <= 24; i++)
+                {
+                    var boxId = $"Shield2-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield2X(2))%; top: @(GetShield2Y(i - 12))%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Shield #2 Column 3 (6 boxes, starts at same Y as column 1) -->
+                @for (int i = 25; i <= 30; i++)
+                {
+                    var boxId = $"Shield2-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield2X(3))%; top: @(GetShield2Y(i - 24))%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Shield #5 boxes (left lower side) - Column 1 (12 boxes) -->
+                @for (int i = 1; i <= 12; i++)
                 {
                     var boxId = $"Shield5-{i}";
                     <div class="damage-box"
-                         style="left: @(GetShield5X())%; top: @(GetShield5Y(i))%;"
+                         style="left: @(GetShield5X(1))%; top: @(GetShield5Y(i))%;"
                          @onclick="() => ToggleBox(boxId)">
                         @if (IsBoxDamaged(boxId))
                         {
@@ -124,12 +152,26 @@
                     </div>
                 }
 
-                <!-- Shield #3 boxes (right lower side) -->
-                @for (int i = 1; i <= 8; i++)
+                <!-- Shield #5 Column 2 (12 boxes, to the right) -->
+                @for (int i = 13; i <= 24; i++)
+                {
+                    var boxId = $"Shield5-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield5X(2))%; top: @(GetShield5Y(i - 12))%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Shield #3 boxes (right lower side) - Column 1 (12 boxes) -->
+                @for (int i = 1; i <= 12; i++)
                 {
                     var boxId = $"Shield3-{i}";
                     <div class="damage-box"
-                         style="left: @(GetShield3X())%; top: @(GetShield3Y(i))%;"
+                         style="left: @(GetShield3X(1))%; top: @(GetShield3Y(i))%;"
                          @onclick="() => ToggleBox(boxId)">
                         @if (IsBoxDamaged(boxId))
                         {
@@ -138,12 +180,40 @@
                     </div>
                 }
 
-                <!-- Shield #4 boxes (bottom) -->
-                @for (int i = 1; i <= 8; i++)
+                <!-- Shield #3 Column 2 (12 boxes, to the left) -->
+                @for (int i = 13; i <= 24; i++)
+                {
+                    var boxId = $"Shield3-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield3X(2))%; top: @(GetShield3Y(i - 12))%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Shield #4 boxes (bottom) - Row 1 (12 boxes) -->
+                @for (int i = 1; i <= 12; i++)
                 {
                     var boxId = $"Shield4-{i}";
                     <div class="damage-box"
-                         style="left: @(GetShield4X(i))%; top: @(GetShield4Y())%;"
+                         style="left: @(GetShield4X(i))%; top: @(GetShield4Y(1))%;"
+                         @onclick="() => ToggleBox(boxId)">
+                        @if (IsBoxDamaged(boxId))
+                        {
+                            <div class="x-mark"></div>
+                        }
+                    </div>
+                }
+
+                <!-- Shield #4 Row 2 (12 boxes, below Row 1) -->
+                @for (int i = 13; i <= 24; i++)
+                {
+                    var boxId = $"Shield4-{i}";
+                    <div class="damage-box"
+                         style="left: @(GetShield4X(i - 12))%; top: @(GetShield4Y(2))%;"
                          @onclick="() => ToggleBox(boxId)">
                         @if (IsBoxDamaged(boxId))
                         {
@@ -176,13 +246,34 @@
             damageBoxes[$"Shield1-{box}"] = false;
         }
 
-        // Shields 2-6 have 8 boxes each
-        for (int shield = 2; shield <= 6; shield++)
+        // Shield 2 has 30 boxes (2 cols of 12 + 1 col of 6)
+        for (int box = 1; box <= 30; box++)
         {
-            for (int box = 1; box <= 30; box++)
-            {
-                damageBoxes[$"Shield{shield}-{box}"] = false;
-            }
+            damageBoxes[$"Shield2-{box}"] = false;
+        }
+
+        // Shield 3 has 24 boxes (2 cols of 12)
+        for (int box = 1; box <= 24; box++)
+        {
+            damageBoxes[$"Shield3-{box}"] = false;
+        }
+
+        // Shield 4 has 24 boxes (2 rows of 12)
+        for (int box = 1; box <= 24; box++)
+        {
+            damageBoxes[$"Shield4-{box}"] = false;
+        }
+
+        // Shield 5 has 24 boxes (2 cols of 12)
+        for (int box = 1; box <= 24; box++)
+        {
+            damageBoxes[$"Shield5-{box}"] = false;
+        }
+
+        // Shield 6 has 30 boxes (2 cols of 12 + 1 col of 6)
+        for (int box = 1; box <= 30; box++)
+        {
+            damageBoxes[$"Shield6-{box}"] = false;
         }
 
         // Add more systems
@@ -254,44 +345,70 @@
         return 20.3 + (boxNum * 2.5); // Vertical boxes
     }
 
-    private double GetShield2X()
+    private double GetShield2X(int column)
     {
-        return 88; // Right side shield
+        // Three columns for Shield 2 (mirrored from Shield 6)
+        return column switch
+        {
+            1 => 88.25,     // First column (right-most)
+            2 => 85.25,     // Second column (middle, to the left)
+            3 => 82.25,     // Third column (left-most, to the left)
+            _ => 88.25
+        };
     }
 
     private double GetShield2Y(int boxNum)
     {
-        return 20.5 + (boxNum * 2.45); // Vertical boxes
+        return 20.5 + (boxNum * 2.45); // Vertical boxes (same as Shield 6)
     }
 
-    private double GetShield5X()
+    private double GetShield5X(int column)
     {
-        return 14.8; // Left side shield (lower)
+        // Two columns for Shield 5 (mirrored from Shield 3)
+        return column switch
+        {
+            1 => 14.8,      // First column (left-most)
+            2 => 17.8,      // Second column (to the right)
+            _ => 14.8
+        };
     }
 
     private double GetShield5Y(int boxNum)
     {
-        return 59.5 + (boxNum * 2.45); // Vertical boxes, lower position
+        return 59.5 + (boxNum * 2.45); // Vertical boxes (same as Shield 3)
     }
 
-    private double GetShield3X()
+    private double GetShield3X(int column)
     {
-        return 88.25; // Right side shield (lower)
+        // Two columns for Shield 3
+        return column switch
+        {
+            1 => 88.25,     // First column (right-most)
+            2 => 85.25,     // Second column (to the left)
+            _ => 88.25
+        };
     }
 
     private double GetShield3Y(int boxNum)
     {
-        return 59.5 + (boxNum * 2.45); // Vertical boxes, lower position
+        return 59.5 + (boxNum * 2.45); // Vertical boxes
     }
 
     private double GetShield4X(int boxNum)
     {
-        return 28.4 + (boxNum * 3.5); // Bottom shield, horizontal boxes
+        // Shield 4 is at bottom, 12 boxes horizontal
+        return 28.4 + (boxNum * 3.5); // Horizontal boxes (same spacing as Shield 1)
     }
 
-    private double GetShield4Y()
+    private double GetShield4Y(int row)
     {
-        return 93.5; // Bottom position
+        // Two rows for Shield 4
+        return row switch
+        {
+            1 => 93.5,      // First row (top)
+            2 => 96.3,      // Second row (below, adjust spacing as needed)
+            _ => 93.5
+        };
     }
 }
 
